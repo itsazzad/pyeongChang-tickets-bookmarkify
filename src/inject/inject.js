@@ -20,12 +20,12 @@ function setQuery(queryKeyValue) {
         if (disciplines.length) {
             window.setTimeout(function () {
                 $.each($('#uCeremony input[type="checkbox"]'), function (i, discipline) {
-                    if(disciplines.includes(discipline.id.split('__')[1])){
+                    if (disciplines.includes(discipline.id.split('__')[1])) {
                         discipline.click();
                     }
                 });
                 $.each($('._disciplineF input[type="checkbox"]'), function (i, discipline) {
-                    if(disciplines.includes(discipline.id.split('__')[1])){
+                    if (disciplines.includes(discipline.id.split('__')[1])) {
                         discipline.click();
                     }
                 });
@@ -44,30 +44,53 @@ function setQuery(queryKeyValue) {
     }, 1000);
 }
 
+
+function continueDataRendering() {
+    let timeoutID;
+    let observer;
+    const target = document.getElementById('tbSession');
+
+    function delayedObserverDisconnect() {
+        timeoutID = window.setTimeout(slowObserverDisconnect, 1000);
+    }
+
+    function slowObserverDisconnect() {
+        observer.disconnect();
+        const searchParams = new URLSearchParams(window.location.search + window.location.hash);
+        const queryKeyValue = {
+            SDate: searchParams.get('SDate'),
+            EDate: searchParams.get('EDate'),
+            SearchKey: searchParams.get('SearchKey'),
+            Disciplines: searchParams.get('Disciplines'),
+            Medal: searchParams.get('Medal'),
+        };
+        window.setTimeout(function () {
+            setQuery(queryKeyValue);
+        }, 1000);
+    }
+
+    function clearObserverDisconnect() {
+        window.clearTimeout(timeoutID);
+    }
+
+    observer = new MutationObserver(function (mutations) {
+        mutations.forEach(function (mutation) {
+            if (timeoutID) {
+                clearObserverDisconnect();
+            }
+            delayedObserverDisconnect();
+        });
+    });
+    const config = {attributes: true, childList: true, characterData: true};
+    observer.observe(target, config);
+}
+
 chrome.extension.sendMessage({}, function (response) {
     const readyStateCheckInterval = setInterval(function () {
         if (document.readyState === "complete") {
             clearInterval(readyStateCheckInterval);
-            $('.sessionTableWrap').hide();
-
-            // ----------------------------------------------------------
-            // This part of the script triggers when page is done loading
-            // ----------------------------------------------------------
             $.when($.ready).then(function () {
-                $('.sessionTableWrap').hide();
-                const searchParams = new URLSearchParams(window.location.search + window.location.hash);
-                const queryKeyValue = {
-                    SDate: searchParams.get('SDate'),
-                    EDate: searchParams.get('EDate'),
-                    SearchKey: searchParams.get('SearchKey'),
-                    Disciplines: searchParams.get('Disciplines'),
-                    Medal: searchParams.get('Medal'),
-                };
-                window.setTimeout(function () {
-                    setQuery(queryKeyValue);
-                }, 1000);
-
-
+                continueDataRendering();
                 $('.sessionInputWrap .btnWrap li:first-child a').on("click", function () {
                     let discipline = '';
                     $.each($('#uCeremony input[type="checkbox"]'), function (k, i) {
@@ -98,10 +121,8 @@ chrome.extension.sendMessage({}, function (response) {
                     }
                     const newRelativePathQuery = window.location.pathname + '?' + searchParams.toString();
                     history.pushState(null, '', newRelativePathQuery);
-
                 });
             });
-
         }
     }, 10);
 });

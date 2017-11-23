@@ -1,8 +1,8 @@
 {
   "name": "PyeongChang tickets bookmarkify",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "manifest_version": 2,
-  "description": "Purchase Tickets &lt; PyeongChang 2018 Tickets. The PyeongChang Organizing Committee for the 2018 Olympic & Paralympic Winter Games tickets resale search bookmarkify",
+  "description": "Purchase 2018 Olympic & Paralympic Winter Games tickets from the PyeongChang Organizing Committee. resale/search/bookmarkify",
   "homepage_url": "https://github.com/itsazzad/pyeongChang-tickets-bookmarkify",
   "icons": {
     "16": "icons/icon16.png",
